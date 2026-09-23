@@ -14,6 +14,7 @@ const COLORS = [
   '#90caf9', // J - azul pálido
   '#ffb74d', // L - orange
   '#b0bec5', // N - tuerca (gris metálico)
+  '#f06292', // U - rosa
 ];
 
 const PIECES = [
@@ -26,6 +27,7 @@ const PIECES = [
   [[6,0,0],[6,6,6],[0,0,0]],                  // J
   [[0,0,7],[7,7,7],[0,0,0]],                  // L
   [[8,8,8],[8,0,8],[8,8,8]],                  // N - tuerca
+  [[9,0,9],[9,9,9],[0,0,0]],                  // U
 ];
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
@@ -53,8 +55,21 @@ function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
 }
 
+const RARE_PIECES = { 9: 0.05 }; // tipo → probabilidad de aparición (U ~5%)
+
+function randomType() {
+  const r = Math.random();
+  let acc = 0;
+  for (const [t, p] of Object.entries(RARE_PIECES)) {
+    acc += p;
+    if (r < acc) return Number(t);
+  }
+  const common = PIECES.map((_, i) => i).filter(i => i && !(i in RARE_PIECES));
+  return common[Math.floor(Math.random() * common.length)];
+}
+
 function randomPiece() {
-  const type = Math.floor(Math.random() * (PIECES.length - 1)) + 1;
+  const type = randomType();
   const shape = PIECES[type].map(row => [...row]);
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
 }
