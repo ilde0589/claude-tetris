@@ -65,7 +65,8 @@ let board, current, next, score, lines, level, paused, gameOver, lastTime, dropA
 let bombQueued, nextBombAt, explosion;
 let theme = 'dark';
 let gridColor = '#22222e';
-let startLevel = 1;
+let startLevel = 1; // seleccion pendiente (aplica en el próximo init())
+let activeStartLevel = 1; // congelado al iniciar la partida actual, usado por clearLines()
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -148,7 +149,7 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.max(startLevel, Math.floor(lines / 10) + 1);
+    level = Math.max(activeStartLevel, Math.floor(lines / 10) + 1);
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     while (lines >= nextBombAt) {
       bombQueued = true;
@@ -404,10 +405,11 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = startLevel;
+  activeStartLevel = startLevel;
+  level = activeStartLevel;
   paused = false;
   gameOver = false;
-  dropInterval = Math.max(100, 1000 - (startLevel - 1) * 90);
+  dropInterval = Math.max(100, 1000 - (activeStartLevel - 1) * 90);
   dropAccum = 0;
   bombQueued = false;
   nextBombAt = BOMB_EVERY;
