@@ -243,22 +243,28 @@ kbd {
   color: var(--overlay-score-color);
 }
 
-#restart-btn {
-  margin-top: 8px;
+.btn {
   background: var(--btn-bg);
   color: var(--btn-color);
   border: none;
   border-radius: 6px;
-  padding: 10px 28px;
-  font-size: 14px;
+  padding: 8px 20px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   transition: background 0.15s;
 }
 
-#restart-btn:hover {
+.btn:hover {
   background: var(--btn-hover-bg);
+}
+
+#restart-btn {
+  margin-top: 8px;
+  padding: 10px 28px;
+  font-size: 14px;
+  letter-spacing: 1px;
 }
 
 /* ---- Menú de pausa ---- */
@@ -274,23 +280,6 @@ kbd {
   flex-direction: column;
   gap: 8px;
   width: 180px;
-}
-
-.pause-actions button {
-  background: var(--btn-bg);
-  color: var(--btn-color);
-  border: none;
-  border-radius: 6px;
-  padding: 8px 20px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: background 0.15s;
-}
-
-.pause-actions button:hover {
-  background: var(--btn-hover-bg);
 }
 
 .pause-controls ul {
