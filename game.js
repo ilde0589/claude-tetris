@@ -84,8 +84,20 @@ function loadRecords() {
     const raw = localStorage.getItem(RECORDS_KEY);
     if (!raw) return defaultRecords();
     const parsed = JSON.parse(raw);
+    const top = Array.isArray(parsed.top)
+      ? parsed.top
+          .filter(e => e && typeof e.name === 'string' && Number.isFinite(e.score))
+          .map(e => ({
+            name: e.name,
+            score: Number(e.score) || 0,
+            lines: Number(e.lines) || 0,
+            level: Number(e.level) || 1,
+            date: typeof e.date === 'string' ? e.date : '',
+          }))
+          .slice(0, MAX_TOP)
+      : [];
     return {
-      top: Array.isArray(parsed.top) ? parsed.top.slice(0, MAX_TOP) : [],
+      top,
       bestCombo: Number(parsed.bestCombo) || 0,
       maxLines: Number(parsed.maxLines) || 0,
     };
@@ -477,14 +489,13 @@ function togglePause() {
   paused = !paused;
   if (!paused) {
     lastTime = performance.now();
+    dropAccum = 0;
+    overlay.classList.add('hidden');
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
     overlayTitle.textContent = 'PAUSA';
     overlayScore.textContent = '';
-    nameEntryDiv.classList.add('hidden');
-    gameOverRecordsDiv.classList.add('hidden');
-    resetRecordsBtnOver.classList.add('hidden');
     overlay.classList.remove('hidden');
   }
 }
