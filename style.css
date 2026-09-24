@@ -226,6 +226,7 @@ kbd {
   flex-direction: column;
   gap: 12px;
   align-items: center;
+  max-width: 260px;
 }
 
 #overlay-title {
@@ -257,4 +258,102 @@ kbd {
 
 #restart-btn:hover {
   background: var(--btn-hover-bg);
+}
+
+/* ---- Records / start screen ---- */
+#start-screen {
+  position: absolute;
+  z-index: 5;
+}
+
+#start-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--title-color);
+  text-shadow: 0 0 20px var(--title-shadow);
+}
+
+.records-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.records-empty {
+  font-size: 12px;
+  color: var(--controls-color);
+}
+
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+}
+
+.records-table td {
+  padding: 2px 6px;
+  color: var(--text);
+  text-align: left;
+}
+
+.records-table tr td:first-child {
+  color: var(--label-color);
+  width: 1%;
+  white-space: nowrap;
+}
+
+.records-table tr td:last-child {
+  text-align: right;
+  font-weight: 700;
+}
+
+.records-table tr.highlight td {
+  color: var(--value-color);
+  font-weight: 700;
+}
+
+.start-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.name-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.name-entry .hint {
+  font-size: 11px;
+  color: var(--controls-color);
+}
+
+#player-name-input {
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 14px;
+  text-align: center;
+  width: 160px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--controls-color);
+  text-decoration: underline;
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.link-btn:hover {
+  color: var(--text);
 }
