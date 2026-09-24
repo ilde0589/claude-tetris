@@ -131,6 +131,17 @@ body {
   border-radius: 4px;
 }
 
+#skin-select {
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 /* ---- Toggle de tema ---- */
 .theme-toggle {
   flex-direction: row;
