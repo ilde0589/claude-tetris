@@ -47,6 +47,7 @@ const SKINS = {
   retro: {
     label: 'Retro',
     bg: null, // null = no pintar fondo propio, usa el --board-bg del tema (claro/oscuro)
+    grid: null, // null = usa el --grid-line del tema
     colors: COLORS,
     draw(context, x, y, colorIndex, size, color) {
       context.fillStyle = color;
@@ -58,6 +59,7 @@ const SKINS = {
   neon: {
     label: 'Neon',
     bg: '#000000',
+    grid: '#1a2a33',
     colors: [
       null,
       '#00e5ff', '#ffea00', '#e040fb', '#00e676', '#ff1744',
@@ -82,6 +84,7 @@ const SKINS = {
   pastel: {
     label: 'Pastel',
     bg: '#f4eef8',
+    grid: '#e0d4ea',
     colors: [
       null,
       '#b3e5fc', '#fff9c4', '#e1bee7', '#c8e6c9', '#ffcdd2',
@@ -107,6 +110,7 @@ const SKINS = {
   pixel: {
     label: 'Pixel Art',
     bg: '#14141f',
+    grid: '#2a2a3a',
     colors: COLORS,
     draw(context, x, y, colorIndex, size, color) {
       const px = x * size + 1, py = y * size + 1, s = size - 2;
@@ -367,7 +371,7 @@ function applySkin(name) {
 }
 
 function drawGrid() {
-  ctx.strokeStyle = gridColor;
+  ctx.strokeStyle = SKINS[currentSkin].grid || gridColor;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -536,6 +540,10 @@ themeToggle.addEventListener('change', () => {
 });
 
 if (skinSelect) {
+  // sincroniza el texto de las opciones con SKINS[*].label (fuente única)
+  for (const opt of skinSelect.options) {
+    if (SKINS[opt.value]) opt.textContent = SKINS[opt.value].label;
+  }
   skinSelect.addEventListener('change', () => {
     applySkin(skinSelect.value);
   });
