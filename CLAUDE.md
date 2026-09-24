@@ -22,4 +22,5 @@ Three files, all logic in `game.js` (single script, global scope, `'use strict'`
   - Keyboard handler drives moves directly; `softDrop`/`hardDrop` award score (1/2 pts per cell).
   - Pause/game over both cancel the rAF (`animId`); `togglePause` restarts `loop` with a fresh `lastTime`.
   - Speed: `dropInterval = max(100, 1000 - (level-1)*90)`; level = `floor(lines/10)+1`; line score = `LINE_SCORES[n] * level`.
+  - Bomb power-up: type index `10` (`BOMB_TYPE`), a 1×1 piece, excluded from `randomType()`'s normal pool. `clearLines` queues one (`bombQueued`) every `BOMB_EVERY` (5) lines via `nextBombAt`; `spawn` hands out the queued bomb as `next` instead of a random piece. In `lockPiece`, a bomb piece skips `merge`/`clearLines` and calls `explode(x, y)` instead, clearing the 3×3 area centered on it (bounds-checked, no gravity refill) and scoring `BOMB_CELL_SCORE` per cleared cell; `explosion` state drives a brief flash in `draw()`.
 - `style.css` — dark/retro styling.

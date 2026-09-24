@@ -15,6 +15,7 @@ const COLORS = [
   '#ffb74d', // L - orange
   '#b0bec5', // N - tuerca (gris metálico)
   '#f06292', // U - rosa
+  '#ff1744', // bomba
 ];
 
 const PIECES = [
@@ -28,9 +29,14 @@ const PIECES = [
   [[0,0,7],[7,7,7],[0,0,0]],                  // L
   [[8,8,8],[8,0,8],[8,8,8]],                  // N - tuerca
   [[9,0,9],[9,9,9],[0,0,0]],                  // U
+  [[10]],                                      // bomba
 ];
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
+
+const BOMB_TYPE = 10;
+const BOMB_EVERY = 5;
+const BOMB_CELL_SCORE = 10;
 
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
@@ -48,6 +54,7 @@ const themeToggle = document.getElementById('theme-toggle');
 const THEME_KEY = 'tetris-theme';
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let bombQueued, nextBombAt, explosion;
 let theme = 'dark';
 let gridColor = '#22222e';
 
@@ -64,7 +71,7 @@ function randomType() {
     acc += p;
     if (r < acc) return Number(t);
   }
-  const common = PIECES.map((_, i) => i).filter(i => i && !(i in RARE_PIECES));
+  const common = PIECES.map((_, i) => i).filter(i => i && i !== BOMB_TYPE && !(i in RARE_PIECES));
   return common[Math.floor(Math.random() * common.length)];
 }
 
@@ -72,6 +79,10 @@ function randomPiece() {
   const type = randomType();
   const shape = PIECES[type].map(row => [...row]);
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
+}
+
+function bombPiece() {
+  return { type: BOMB_TYPE, shape: [[BOMB_TYPE]], x: Math.floor(COLS / 2), y: 0 };
 }
 
 function collide(shape, ox, oy) {
@@ -130,8 +141,26 @@ function clearLines() {
     score += (LINE_SCORES[cleared] || 0) * level;
     level = Math.floor(lines / 10) + 1;
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    while (lines >= nextBombAt) {
+      bombQueued = true;
+      nextBombAt += BOMB_EVERY;
+    }
     updateHUD();
   }
+}
+
+function explode(cx, cy) {
+  let count = 0;
+  for (let r = cy - 1; r <= cy + 1; r++) {
+    for (let c = cx - 1; c <= cx + 1; c++) {
+      if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
+      if (board[r][c]) count++;
+      board[r][c] = 0;
+    }
+  }
+  score += count * BOMB_CELL_SCORE;
+  explosion = { x: cx, y: cy, t: performance.now() };
+  updateHUD();
 }
 
 function ghostY() {
@@ -158,14 +187,23 @@ function softDrop() {
 }
 
 function lockPiece() {
-  merge();
-  clearLines();
+  if (current.type === BOMB_TYPE) {
+    explode(current.x, current.y);
+  } else {
+    merge();
+    clearLines();
+  }
   spawn();
 }
 
 function spawn() {
   current = next;
-  next = randomPiece();
+  if (bombQueued) {
+    next = bombPiece();
+    bombQueued = false;
+  } else {
+    next = randomPiece();
+  }
   if (collide(current.shape, current.x, current.y)) {
     endGame();
   }
@@ -187,6 +225,20 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
   // highlight
   context.fillStyle = 'rgba(255,255,255,0.12)';
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  if (colorIndex === BOMB_TYPE) {
+    const cx = x * size + size / 2;
+    const cy = y * size + size / 2;
+    context.fillStyle = 'rgba(0,0,0,0.7)';
+    context.beginPath();
+    context.arc(cx, cy, size * 0.28, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = '#ffb74d';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(cx + size * 0.15, cy - size * 0.28);
+    context.lineTo(cx + size * 0.32, cy - size * 0.42);
+    context.stroke();
+  }
   context.globalAlpha = 1;
 }
 
@@ -239,6 +291,24 @@ function draw() {
   for (let r = 0; r < current.shape.length; r++)
     for (let c = 0; c < current.shape[r].length; c++)
       drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
+
+  // explosion flash
+  if (explosion) {
+    const elapsed = performance.now() - explosion.t;
+    if (elapsed < 250) {
+      const alpha = 1 - elapsed / 250;
+      ctx.globalAlpha = alpha * 0.7;
+      ctx.fillStyle = '#ffb74d';
+      const ex = Math.max(0, explosion.x - 1);
+      const ey = Math.max(0, explosion.y - 1);
+      const ew = Math.min(COLS, explosion.x + 2) - ex;
+      const eh = Math.min(ROWS, explosion.y + 2) - ey;
+      ctx.fillRect(ex * BLOCK, ey * BLOCK, ew * BLOCK, eh * BLOCK);
+      ctx.globalAlpha = 1;
+    } else {
+      explosion = null;
+    }
+  }
 }
 
 function drawNext() {
@@ -300,6 +370,9 @@ function init() {
   gameOver = false;
   dropInterval = 1000;
   dropAccum = 0;
+  bombQueued = false;
+  nextBombAt = BOMB_EVERY;
+  explosion = null;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
